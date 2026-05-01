@@ -32,13 +32,10 @@ public class TicketService {
     public TicketResponseDTO purchase(PurchaseTicketRequest request, User user) {
 
         // 1. Obtener el TicketType con bloqueo pesimista
-        TicketType ticketType = ticketRepository
-                .findTicketTypeForUpdate(request.ticketTypeId());
-
-        if (ticketType == null) {
-            throw new ResourceNotFoundException(
-                    "Tipo de ticket", request.ticketTypeId());
-        }
+        TicketType ticketType = ticketTypeRepository
+                .findByIdForUpdate(request.ticketTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Tipo de ticket", request.ticketTypeId()));
 
         // 2. Verificar que el evento está publicado
         if (ticketType.getEvent().getStatus() != EventStatus.PUBLISHED) {
@@ -121,8 +118,10 @@ public class TicketService {
         ticketRepository.save(ticket);
 
         // 5. Devolver el cupo — con bloqueo pesimista
-        TicketType ticketType = ticketRepository
-                .findTicketTypeForUpdate(ticket.getTicketType().getId());
+        TicketType ticketType = ticketTypeRepository
+                .findByIdForUpdate(ticket.getTicketType().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Tipo de ticket", ticket.getTicketType().getId()));
         ticketType.setAvailableCapacity(ticketType.getAvailableCapacity() + 1);
         ticketTypeRepository.save(ticketType);
 

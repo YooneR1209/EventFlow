@@ -39,11 +39,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("eventId") Long eventId,
             @Param("status") TicketStatus status);
 
-    // Bloqueo pesimista — para la compra concurrente
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT t FROM TicketType t WHERE t.id = :id")
-    TicketType findTicketTypeForUpdate(@Param("id") Long id);
-
     // Contar tickets vendidos por tipo
     @Query("SELECT COUNT(t) FROM Ticket t " +
             "WHERE t.ticketType.id = :ticketTypeId " +
