@@ -6,11 +6,13 @@ import com.Alexander.eventflow.exception.BusinessException;
 import com.Alexander.eventflow.exception.InsufficientTicketsException;
 import com.Alexander.eventflow.exception.ResourceNotFoundException;
 import com.Alexander.eventflow.mapper.TicketMapper;
+import com.Alexander.eventflow.model.Event;
 import com.Alexander.eventflow.model.Ticket;
 import com.Alexander.eventflow.model.TicketType;
 import com.Alexander.eventflow.model.User;
 import com.Alexander.eventflow.model.enums.EventStatus;
 import com.Alexander.eventflow.model.enums.TicketStatus;
+import com.Alexander.eventflow.repository.EventRepository;
 import com.Alexander.eventflow.repository.TicketRepository;
 import com.Alexander.eventflow.repository.TicketTypeRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketTypeRepository ticketTypeRepository;
     private final TicketMapper ticketMapper;
+    private final EventRepository eventRepository;
 
     @Transactional
     public TicketResponseDTO purchase(PurchaseTicketRequest request, User user) {
@@ -129,6 +132,18 @@ public class TicketService {
     }
 
     public List<TicketResponseDTO> findByEvent(Long eventId, User organizer) {
+
+        // 1. Verificar que el evento existe
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento", eventId));
+
+        // 2. Verificar que pertenece al organizador
+        if (!event.getOrganizer().getId().equals(organizer.getId())) {
+            throw new BusinessException(
+                    "No tienes permiso para ver los asistentes de este evento");
+        }
+
+        // 3. Devolver los tickets activos
         return ticketRepository
                 .findByEventIdAndStatus(eventId, TicketStatus.ACTIVE)
                 .stream()
