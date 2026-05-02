@@ -1,16 +1,13 @@
 package com.Alexander.eventflow.repository;
 
 import com.Alexander.eventflow.model.Ticket;
-import com.Alexander.eventflow.model.TicketType;
 import com.Alexander.eventflow.model.User;
 import com.Alexander.eventflow.model.enums.TicketStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
